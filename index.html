@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tymoyato | Music Hub</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Bebas+Neue&family=Montserrat:wght@600&family=Oswald:wght@600&family=Orbitron:wght@600&family=Zen+Maru+Gothic:wght@500&family=Playfair+Display:ital,wght@0,600;1,600&family=Anton&family=Poppins:wght@600&family=Teko:wght@600&display=swap');
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      overflow-x: hidden;
+    }
+
+    /* background canvas */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 480px;
+      padding: 60px 24px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* avatar */
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      overflow: hidden;
+      margin-bottom: 16px;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: #fff;
+      user-select: none;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .name {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .bio {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      text-align: center;
+      line-height: 1.5;
+      margin-bottom: 36px;
+      max-width: 320px;
+    }
+
+    /* links list */
+    .links {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .link-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      backdrop-filter: blur(8px);
+    }
+
+    .link-card:hover {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(255, 255, 255, 0.12);
+    }
+
+    .link-card:active {
+      transform: translateY(0);
+    }
+
+    .link-icon {
+      position: absolute;
+      left: 20px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.7;
+    }
+
+    .link-card:hover .link-icon {
+      opacity: 1;
+    }
+
+    .link-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    .link-arrow {
+      position: absolute;
+      right: 20px;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: all 0.25s ease;
+    }
+
+    .link-card:hover .link-arrow {
+      opacity: 0.6;
+      transform: translateX(0);
+    }
+
+    /* genre fonts */
+    .font-top10 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 19px;
+      letter-spacing: 0.08em;
+    }
+    .font-ru-pop {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+    }
+    .font-ru-hiphop {
+      font-family: 'Oswald', sans-serif;
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .font-ru-electronic {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.06em;
+    }
+    .font-jp-pop {
+      font-family: 'Zen Maru Gothic', sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.01em;
+    }
+    .font-fr-pop {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-style: italic;
+      letter-spacing: 0.01em;
+    }
+    .font-en-rock {
+      font-family: 'Anton', sans-serif;
+      font-size: 18px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .font-en-pop {
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+      letter-spacing: 0.01em;
+    }
+    .font-en-hiphop {
+      font-family: 'Teko', sans-serif;
+      font-size: 19px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* disabled / coming soon card */
+    .link-card.disabled {
+      opacity: 0.35;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .coming-soon {
+      position: absolute;
+      right: 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.08);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* language group label */
+    .group-label {
+      width: 100%;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.2);
+      padding-left: 4px;
+      margin-top: 8px;
+      margin-bottom: -4px;
+    }
+
+    /* section divider */
+    .divider {
+      width: 40px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 12px 0;
+    }
+
+    /* modal overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      width: 90%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transform: translateY(16px) scale(0.96);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-overlay.active .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-title {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.5);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .modal-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 18px 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .modal-btn svg {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .modal-btn.yt {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .modal-btn.yt:hover {
+      background: #ff0000;
+      border-color: #ff0000;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(255, 0, 0, 0.25);
+    }
+
+    .modal-btn.spotify {
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .modal-btn.spotify:hover {
+      background: #1db954;
+      border-color: #1db954;
+      color: #000;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(29, 185, 84, 0.25);
+    }
+    .modal-btn.spotify:hover svg {
+      fill: #000;
+    }
+
+    .modal-btn svg {
+      fill: #fff;
+    }
+
+    .modal-close {
+      margin-top: 4px;
+      background: none;
+      border: none;
+      color: rgba(255, 255, 255, 0.3);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 10px;
+      transition: color 0.2s;
+      text-align: center;
+    }
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    /* make link-card a button */
+    .link-card {
+      cursor: pointer;
+    }
+
+    /* footer */
+    .footer {
+      margin-top: 48px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.2);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* fade-in animation */
+    .container > * {
+      animation: fadeUp 0.6s ease both;
+    }
+    .container > *:nth-child(1) { animation-delay: 0.0s; }
+    .container > *:nth-child(2) { animation-delay: 0.05s; }
+    .container > *:nth-child(3) { animation-delay: 0.1s; }
+    .container > *:nth-child(4) { animation-delay: 0.15s; }
+    .container > *:nth-child(5) { animation-delay: 0.2s; }
+    .container > *:nth-child(6) { animation-delay: 0.25s; }
+    .container > *:nth-child(7) { animation-delay: 0.3s; }
+
+    /* section label */
+    .section-label {
+      width: 100%;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.35);
+      margin-bottom: -4px;
+      padding-left: 4px;
+    }
+
+    .links .link-card {
+      animation: fadeUp 0.5s ease both;
+    }
+    .links .link-card:nth-child(1)  { animation-delay: 0.2s; }
+    .links .link-card:nth-child(2)  { animation-delay: 0.27s; }
+    .links .link-card:nth-child(3)  { animation-delay: 0.34s; }
+    .links .link-card:nth-child(4)  { animation-delay: 0.41s; }
+    .links .link-card:nth-child(5)  { animation-delay: 0.48s; }
+    .links .link-card:nth-child(6)  { animation-delay: 0.55s; }
+    .links .link-card:nth-child(7)  { animation-delay: 0.62s; }
+    .links .link-card:nth-child(8)  { animation-delay: 0.69s; }
+
+    .section-label, .group-label {
+      animation: fadeUp 0.5s ease both;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* responsive */
+    @media (max-width: 520px) {
+      .container {
+        padding: 48px 16px 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="container">
+
+    <!-- AVATAR — replace with your image or keep the initial -->
+    <div class="avatar">
+      <img src="avatar.jpg" alt="Tymoyato">
+    </div>
+
+    <div class="name">Tymoyato</div>
+    <div class="bio">Curated playlists across languages and genres. One hub, all the sounds.</div>
+
+    <div class="section-label">Top 10</div>
+
+    <div class="links">
+
+      <div class="link-card font-top10 disabled">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>
+        </span>
+        Top 10
+        <span class="coming-soon">Coming soon</span>
+      </div>
+
+    </div>
+
+    <div class="section-label">Playlists</div>
+
+    <div class="links">
+
+      <div class="group-label">Russian</div>
+
+      <div class="link-card font-ru-pop" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlMV_fSV5PzC5_d4kKQO5soK" data-spotify="https://open.spotify.com/playlist/0UVdeILuQrS0cQoxirL0iE">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        Russian - Pop / Urban
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="link-card font-ru-hiphop" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlM_PC-PyoIgb0fPIYZC3K0X" data-spotify="https://open.spotify.com/playlist/5pRLjVv1GhPw6hTpymRa0i">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        Russian - Hip-Hop / Rap
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="link-card font-ru-electronic" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlNpwlCdG6h4JlIx5cAN-pf2" data-spotify="https://open.spotify.com/playlist/2SyTJ1KhPW2E5PGRimGS0S">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        Russian - Electronic
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="group-label">Japanese</div>
+
+      <div class="link-card font-jp-pop" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlP74TL6I7EvnCAPkow98KbE" data-spotify="https://open.spotify.com/playlist/4lDIEivup6yAtx9nM0UFrD">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        Japanese - Pop / Urban
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="group-label">French</div>
+
+      <div class="link-card font-fr-pop" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlNjYRVZI_G-a1az78iOWHwO" data-spotify="https://open.spotify.com/playlist/2mvf3NW9zJK4P8nQCGtF53">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        French - Pop / Urban
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="group-label">English / Other</div>
+
+      <div class="link-card font-en-rock" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlNkabD3yYYdUO8F67l2tohs" data-spotify="https://open.spotify.com/playlist/7gztn4POya4eLF57VtOHID">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        English / Other - Rock
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="link-card font-en-pop" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlMtfns56QNKl-zVP44Xxu46" data-spotify="https://open.spotify.com/playlist/0Hm3YibZdYQ3DGsQhQrIZA">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        English / Other - Pop / Urban
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+      <div class="link-card font-en-hiphop" data-yt="https://music.youtube.com/playlist?list=PLIYzRoHjcOlPC6wdHVyivuNktlDpLp1GW" data-spotify="https://open.spotify.com/playlist/5rNTFyYKiBB5ybdRhSMykf">
+        <span class="link-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+        </span>
+        English / Other - Hip-Hop / Rap
+        <span class="link-arrow">&rarr;</span>
+      </div>
+
+    </div>
+
+    <div class="footer">links</div>
+
+  </div>
+
+  <!-- Platform chooser modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-title" id="modal-title">Choose platform</div>
+
+      <a class="modal-btn yt" id="btn-yt" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12 0C5.376 0 0 5.376 0 12s5.376 12 12 12 12-5.376 12-12S18.624 0 12 0zm0 21.6c-5.292 0-9.6-4.308-9.6-9.6S6.708 2.4 12 2.4s9.6 4.308 9.6 9.6-4.308 9.6-9.6 9.6zM9.6 16.8l8.4-4.8-8.4-4.8v9.6z" fill="currentColor"/></svg>
+        YouTube Music
+      </a>
+
+      <a class="modal-btn spotify" id="btn-spotify" href="#" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
+        Spotify
+      </a>
+
+      <button class="modal-close" id="modal-close">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById('modal');
+    const modalTitle = document.getElementById('modal-title');
+    const btnYt = document.getElementById('btn-yt');
+    const btnSpotify = document.getElementById('btn-spotify');
+    const modalClose = document.getElementById('modal-close');
+
+    document.querySelectorAll('.link-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const yt = card.dataset.yt;
+        const spotify = card.dataset.spotify;
+        const name = card.textContent.trim().replace('→', '').trim();
+
+        modalTitle.textContent = name;
+        btnYt.href = yt;
+        btnSpotify.href = spotify;
+
+        overlay.classList.add('active');
+      });
+    });
+
+    modalClose.addEventListener('click', () => {
+      overlay.classList.remove('active');
+    });
+
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.remove('active');
+    });
+
+    // === Music background animation ===
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Floating music notes
+    const notes = ['♪', '♫', '♩', '♬'];
+    const particles = [];
+
+    for (let i = 0; i < 25; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        size: 10 + Math.random() * 16,
+        speed: 0.15 + Math.random() * 0.35,
+        drift: (Math.random() - 0.5) * 0.3,
+        opacity: 0.03 + Math.random() * 0.06,
+        note: notes[Math.floor(Math.random() * notes.length)],
+        phase: Math.random() * Math.PI * 2,
+        wobble: 0.3 + Math.random() * 0.7
+      });
+    }
+
+    // Equalizer bars at bottom
+    const barCount = 48;
+    const bars = [];
+    for (let i = 0; i < barCount; i++) {
+      bars.push({
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.02 + Math.random() * 0.03,
+        maxH: 20 + Math.random() * 50
+      });
+    }
+
+    // Sound wave rings
+    const rings = [];
+    function spawnRing() {
+      rings.push({
+        x: w * 0.3 + Math.random() * w * 0.4,
+        y: h * 0.2 + Math.random() * h * 0.3,
+        r: 0,
+        maxR: 60 + Math.random() * 100,
+        opacity: 0.06 + Math.random() * 0.04,
+        speed: 0.3 + Math.random() * 0.4
+      });
+    }
+
+    let time = 0;
+    let ringTimer = 0;
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+      time += 0.016;
+      ringTimer += 0.016;
+
+      // Draw floating notes
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      particles.forEach(p => {
+        p.y -= p.speed;
+        p.x += Math.sin(time * p.wobble + p.phase) * p.drift;
+
+        if (p.y < -30) {
+          p.y = h + 30;
+          p.x = Math.random() * w;
+        }
+
+        ctx.font = p.size + 'px serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + p.opacity + ')';
+        ctx.fillText(p.note, p.x, p.y);
+      });
+
+      // Draw equalizer bars at bottom
+      const barW = w / barCount;
+      bars.forEach((bar, i) => {
+        const val = (Math.sin(time * bar.speed * 60 + bar.phase) + 1) / 2;
+        const barH = val * bar.maxH;
+        const alpha = 0.025 + val * 0.035;
+
+        ctx.fillStyle = 'rgba(255, 255, 255, ' + alpha + ')';
+        ctx.fillRect(i * barW + 1, h - barH, barW - 2, barH);
+      });
+
+      // Draw expanding rings
+      if (ringTimer > 2.5) {
+        spawnRing();
+        ringTimer = 0;
+      }
+
+      for (let i = rings.length - 1; i >= 0; i--) {
+        const ring = rings[i];
+        ring.r += ring.speed;
+        const life = 1 - ring.r / ring.maxR;
+
+        if (life <= 0) {
+          rings.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(ring.x, ring.y, ring.r, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, ' + (ring.opacity * life) + ')';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
